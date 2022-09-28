@@ -1,0 +1,58 @@
+{
+  "name": "projeto22_autoral-sheet_music_to_your_lyrics",
+  "version": "1.0.0",
+  "description": "a project to you learn musics! contribute with your knowledge to teach who wants to learn.",
+  "main": "src/server.ts",
+  "scripts": {
+    "dev": "nodemon src/server.ts",
+    "start": "nodemon dist/src/server.js",
+    "build": "tsc && npx prisma generate && npx prisma migrate deploy",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:seed": "npx prisma db seed",
+    "test:unit": "dotenv -e .env.test jest -i --coverage --testPathPattern=tests/unit",
+    "test:integrate": "dotenv -e .env.test jest -i --coverage --testPathPattern=tests/integrate",
+    "test:e2e": "dotenv -e .env.test nodemon src/server.ts"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@prisma/client": "^4.4.0",
+    "@sendgrid/mail": "^7.7.0",
+    "axios": "^0.27.2",
+    "bcrypt": "^5.0.1",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.2",
+    "express": "^4.18.1",
+    "express-async-errors": "^3.1.1",
+    "jest": "^29.0.3",
+    "joi": "^17.6.0",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.5-lts.1",
+    "nodemon": "^2.0.19"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^7.5.0",
+    "@types/bcrypt": "^5.0.0",
+    "@types/cors": "^2.8.12",
+    "@types/express": "^4.17.13",
+    "@types/jest": "^29.0.3",
+    "@types/jsonwebtoken": "^8.5.9",
+    "@types/multer": "^1.4.7",
+    "@types/supertest": "^2.0.12",
+    "@typescript-eslint/eslint-plugin": "^5.38.1",
+    "@typescript-eslint/parser": "^5.38.1",
+    "dotenv-cli": "^6.0.0",
+    "eslint": "^8.24.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "prisma": "^4.4.0",
+    "supertest": "^6.2.4",
+    "ts-jest": "^29.0.2",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.8.2"
+  }
+}
