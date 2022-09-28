@@ -23,6 +23,10 @@ async function insert(user: UserInsertData) {
   await userRepository.insert({ ...user, password: encryptedPassword });
 }
 
+function generateValidToken(id: number, name: string): string {
+  return jwt.sign({ id, name }, secretKey!, { expiresIn: '1h' });
+}
+
 async function login(user: UserLogin): Promise<string> {
   const isUser: User | null = await userRepository.findByEmail(user.email);
 
@@ -30,7 +34,11 @@ async function login(user: UserLogin): Promise<string> {
     throw errors.notFound('user', 'users');
   }
 
-  const token = jwt.sign({ id: isUser.id, name: isUser.name }, secretKey!, { expiresIn: '1h' });
+  if (!hash.compare(user.password, isUser.password)) {
+    throw errors.badRequest('Wrong password');
+  }
+
+  const token = generateValidToken(isUser.id, isUser.name);
 
   return token;
 }
@@ -38,6 +46,7 @@ async function login(user: UserLogin): Promise<string> {
 const userService = {
   insert,
   login,
+  generateValidToken,
 };
 
 export default userService;

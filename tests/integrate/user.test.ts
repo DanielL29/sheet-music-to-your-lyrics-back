@@ -17,14 +17,10 @@ describe('POST /users/sign-up', () => {
   });
 
   it('given a email registered throw a conflict, return 409', async () => {
-    const user = await userFactory.__insertUser();
+    const user = userFactory.__createUser();
 
-    const result = await supertest(app).post('/users/sign-up').send({
-      name: user.name,
-      email: user.email,
-      password: user.password,
-      confirmPassword: user.password,
-    });
+    await supertest(app).post('/users/sign-up').send({ ...user, confirmPassword: user.password });
+    const result = await supertest(app).post('/users/sign-up').send({ ...user, confirmPassword: user.password });
 
     expect(result.status).toBe(409);
   });
@@ -38,8 +34,9 @@ describe('POST /users/sign-up', () => {
 
 describe('POST /users/sign-in', () => {
   it('given a correct user object to login, return 200 and receive a token', async () => {
-    const user = await userFactory.__insertUser();
+    const user = userFactory.__createUser();
 
+    await supertest(app).post('/users/sign-up').send({ ...user, confirmPassword: user.password });
     const result = await supertest(app).post('/users/sign-in').send({
       email: user.email,
       password: user.password,
@@ -58,6 +55,18 @@ describe('POST /users/sign-in', () => {
     });
 
     expect(result.status).toBe(404);
+  });
+
+  it('given a wrong password return 400', async () => {
+    const user = userFactory.__createUser();
+
+    await supertest(app).post('/users/sign-up').send({ ...user, confirmPassword: user.password });
+    const result = await supertest(app).post('/users/sign-in').send({
+      email: user.email,
+      password: 'wrong password to test',
+    });
+
+    expect(result.status).toBe(400);
   });
 
   it('given a empty object throw a unprocessable entity, return 422', async () => {
