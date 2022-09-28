@@ -7,11 +7,11 @@ beforeEach(async () => {
   await prisma.$executeRaw`TRUNCATE TABLE "users", "musicContributors", "sheetMusics" RESTART IDENTITY`;
 });
 
-describe('POST /user/sign-up', () => {
+describe('POST /users/sign-up', () => {
   it('given a correct user object with no email registered, create a user, return 200', async () => {
     const user = userFactory.__createUser();
 
-    const result = await supertest(app).post('/user/sign-up').send({ ...user, confirmPassword: user.password });
+    const result = await supertest(app).post('/users/sign-up').send({ ...user, confirmPassword: user.password });
 
     expect(result.status).toBe(201);
   });
@@ -19,7 +19,7 @@ describe('POST /user/sign-up', () => {
   it('given a email registered throw a conflict, return 409', async () => {
     const user = await userFactory.__insertUser();
 
-    const result = await supertest(app).post('/user/sign-up').send({
+    const result = await supertest(app).post('/users/sign-up').send({
       name: user.name,
       email: user.email,
       password: user.password,
@@ -30,7 +30,7 @@ describe('POST /user/sign-up', () => {
   });
 
   it('given a empty object throw a unprocessable entity, return 422', async () => {
-    const result = await supertest(app).post('/user/sign-up').send();
+    const result = await supertest(app).post('/users/sign-up').send();
 
     expect(result.status).toBe(422);
   });
