@@ -3,8 +3,10 @@ import dotenv from 'dotenv';
 import jwt from 'jsonwebtoken';
 import errors from '../errors/errorsThrow';
 import userRepository from '../repositories/userRepository';
-import { UserInsertData } from '../types/userType';
+import { UserInsertData, UserLogin } from '../types/userType';
 import hash from '../utils/hashUtil';
+
+dotenv.config();
 
 const secretKey = process.env.SECRET_KEY;
 
@@ -21,7 +23,7 @@ async function insert(user: UserInsertData) {
   await userRepository.insert({ ...user, password: encryptedPassword });
 }
 
-async function login(user: UserInsertData): Promise<string> {
+async function login(user: UserLogin): Promise<string> {
   const isUser: User | null = await userRepository.findByEmail(user.email);
 
   if (!isUser) {
