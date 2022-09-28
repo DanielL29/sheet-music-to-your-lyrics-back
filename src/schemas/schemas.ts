@@ -6,7 +6,8 @@ export interface Schemas {
 }
 
 const schemas: Schemas = {
-  user: userSchema,
+  signUp: userSchema.signUpSchema,
+  signIn: userSchema.signInSchema,
 };
 
 export default schemas;

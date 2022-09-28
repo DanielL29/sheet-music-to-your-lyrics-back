@@ -12,6 +12,7 @@ async function insert(user: UserInsertData) {
   }
 
   const encryptedPassword = hash.encrypt(user.password);
+  delete user.confirmPassword;
 
   await userRepository.insert({ ...user, password: encryptedPassword });
 }

@@ -1,8 +1,8 @@
 import { Request, NextFunction } from 'express';
 import schemas from '../schemas/schemas';
-import * as errors from '../errors/errorsThrow';
+import errors from '../errors/errorsThrow';
 
-export default function validateSchemas(schema: string): Function {
+export default function validateSchemas(schema: string) {
   if (!Object.prototype.hasOwnProperty.call(schemas, schema)) {
     throw errors.unprocessableEntity('Missing schema/invalid schema');
   }

@@ -11,13 +11,13 @@ datasource db {
 }
 
 model User {
-  id               Int                @id @default(autoincrement())
-  name             String
-  email            String             @unique
-  password         String
-  createdAt        DateTime           @default(now())
-  MusicContributor MusicContributor[]
-  SheetMusic       SheetMusic[]
+  id                Int                @id @default(autoincrement())
+  name              String
+  email             String             @unique
+  password          String
+  createdAt         DateTime           @default(now())
+  musicContributors MusicContributor[]
+  sheetMusics       SheetMusic[]
 
   @@map("users")
 }
@@ -26,7 +26,7 @@ model Category {
   id        Int      @id @default(autoincrement())
   name      String   @unique
   createdAt DateTime @default(now())
-  Music     Music[]
+  musics    Music[]
 
   @@map("categories")
 }
@@ -43,8 +43,8 @@ model Music {
   categories        Category           @relation(fields: [categoryId], references: [id])
   categoryId        Int
   createdAt         DateTime           @default(now())
-  MusicContributor  MusicContributor[]
-  SheetMusic        SheetMusic[]
+  musicContributors MusicContributor[]
+  sheetMusics       SheetMusic[]
 
   @@map("musics")
 }
