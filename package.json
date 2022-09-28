@@ -9,6 +9,8 @@
     "build": "tsc && npx prisma generate && npx prisma migrate deploy",
     "prisma:migrate": "npx prisma migrate dev",
     "prisma:seed": "npx prisma db seed",
+    "prisma:migrate:test": "dotenv -e .env.test prisma migrate dev",
+    "prisma:seed:test": "dotenv -e .env.test prisma db seed",
     "test:unit": "dotenv -e .env.test jest -i --coverage --testPathPattern=tests/unit",
     "test:integrate": "dotenv -e .env.test jest -i --coverage --testPathPattern=tests/integrate",
     "test:e2e": "dotenv -e .env.test nodemon src/server.ts"

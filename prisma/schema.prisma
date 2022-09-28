@@ -9,3 +9,64 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model User {
+  id               Int                @id @default(autoincrement())
+  name             String
+  email            String             @unique
+  password         String
+  createdAt        DateTime           @default(now())
+  MusicContributor MusicContributor[]
+  SheetMusic       SheetMusic[]
+
+  @@map("users")
+}
+
+model Category {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  Music     Music[]
+
+  @@map("categories")
+}
+
+model Music {
+  id                Int                @id @default(autoincrement())
+  name              String
+  lyric             String
+  author            String
+  translatedLyric   String?
+  sheetMusicFile    String?
+  musicVideoUrl     String?
+  musicHelpVideoUrl String?
+  categories        Category           @relation(fields: [categoryId], references: [id])
+  categoryId        Int
+  createdAt         DateTime           @default(now())
+  MusicContributor  MusicContributor[]
+  SheetMusic        SheetMusic[]
+
+  @@map("musics")
+}
+
+model MusicContributor {
+  musics       Music @relation(fields: [musicId], references: [id])
+  musicId      Int
+  contributors User  @relation(fields: [userId], references: [id])
+  userId       Int
+
+  @@id([musicId, userId])
+  @@map("musicContributors")
+}
+
+model SheetMusic {
+  id           Int    @id @default(autoincrement())
+  musicSnippet String
+  snippetAid   String
+  users        User   @relation(fields: [userId], references: [id])
+  userId       Int
+  musics       Music  @relation(fields: [musicId], references: [id])
+  musicId      Int
+
+  @@map("sheetMusics")
+}
