@@ -11,14 +11,14 @@ dotenv.config();
 
 const { VAGALUME_API_URL, VAGALUME_API_KEY } = process.env;
 
-async function verifyMusicAndCategory(music: MusicSchema) {
-  const isMusic: Music | null = await musicRepository.findByName(music.name);
+async function verifyMusicAndCategory(name: string, categoryId: number) {
+  const isMusic: Music | null = await musicRepository.findByName(name);
 
   if (isMusic) {
-    throw errors.conflict('music', 'registered');
+    throw errors.conflict('music is', 'registered');
   }
 
-  const isCategory: Category | null = await categoryRepository.findById(Number(music.categoryId));
+  const isCategory: Category | null = await categoryRepository.findById(Number(categoryId));
 
   if (!isCategory) {
     throw errors.notFound('category', 'categories');
@@ -26,6 +26,8 @@ async function verifyMusicAndCategory(music: MusicSchema) {
 }
 
 async function getMusicFromVagalume(music: MusicSchema) {
+  let translatedLyric = null;
+
   const { data: musicFromVagalume } = await axios.get(VAGALUME_API_URL!, {
     params: {
       art: music.author,
@@ -38,37 +40,53 @@ async function getMusicFromVagalume(music: MusicSchema) {
     throw errors.notFound(undefined, undefined, 'This music was not found in vagalume music datas, try a known music or verify if you wrote this right');
   }
 
-  const translatedLyric = musicFromVagalume.mus[0].translate.find(
-    (translated: any) => translated.lang === 1,
-  );
+  if (musicFromVagalume.mus[0].translate) {
+    const findTranslated = musicFromVagalume.mus[0].translate.find(
+      (translated: any) => translated.lang === 1,
+    );
 
-  return { lyric: musicFromVagalume.mus[0].text, translatedLyric: translatedLyric.text };
-}
-
-async function insertFileInAWS(sheetMusicFile: Express.Multer.File | undefined) {
-  const s3Storage = new S3Storage();
-
-  if (!sheetMusicFile?.filename) {
-    throw errors.badRequest('Your "sheetMusicFile" needs to have a file');
+    translatedLyric = findTranslated.text;
   }
 
-  await s3Storage.saveFile(sheetMusicFile!.filename);
+  return {
+    lyric: musicFromVagalume.mus[0].text,
+    translatedLyric,
+    name: musicFromVagalume.mus[0].name,
+    author: musicFromVagalume.art.name,
+  };
+}
+
+async function insertFileInAWS(
+  sheetMusicFile: Express.Multer.File | undefined,
+): Promise<string | null> {
+  const s3Storage = new S3Storage();
+
+  if (!sheetMusicFile) {
+    return null;
+  }
+
+  await s3Storage.saveFile(sheetMusicFile.filename);
+
+  return sheetMusicFile.filename;
 }
 
 async function insert(music: MusicSchema, sheetMusicFile: Express.Multer.File | undefined) {
-  await verifyMusicAndCategory(music);
+  const {
+    lyric, translatedLyric, name, author,
+  } = await getMusicFromVagalume(music);
 
-  const { lyric, translatedLyric } = await getMusicFromVagalume(music);
+  await verifyMusicAndCategory(name, music.categoryId);
 
-  await insertFileInAWS(sheetMusicFile);
+  const filename = await insertFileInAWS(sheetMusicFile);
 
   await musicRepository.insert({
     ...music,
-    name: music.name.toLowerCase(),
+    author,
+    name,
     categoryId: Number(music.categoryId),
+    sheetMusicFile: filename,
     lyric,
     translatedLyric,
-    sheetMusicFile: sheetMusicFile!.filename,
   });
 }
 
