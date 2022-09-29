@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
-import { MusicSchema } from '../types/musicType';
+import { MusicSchema, MusicUpdateData } from '../types/musicType';
 
 async function insert(req: Request, res: Response) {
   const music: MusicSchema = req.body;
@@ -11,8 +11,19 @@ async function insert(req: Request, res: Response) {
   res.sendStatus(201);
 }
 
+async function update(req: Request, res: Response) {
+  const musicId: number = Number(req.params.musicId);
+  const music: MusicUpdateData = req.body;
+  const sheetMusicFile: Express.Multer.File | undefined = req.file;
+
+  await musicService.update(musicId, music, sheetMusicFile);
+
+  res.sendStatus(200);
+}
+
 const musicController = {
   insert,
+  update,
 };
 
 export default musicController;
