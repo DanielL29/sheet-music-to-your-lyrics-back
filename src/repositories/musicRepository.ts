@@ -2,7 +2,7 @@ import { Music } from '@prisma/client';
 import prisma from '../database';
 import { MusicInsertData } from '../types/musicType';
 
-async function findByName(name: string): Promise<Music> {
+async function findByName(name: string): Promise<Music | null> {
   return prisma.music.findUnique({ where: { name } });
 }
 
