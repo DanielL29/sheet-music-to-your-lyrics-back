@@ -9,7 +9,7 @@ import S3Storage from '../classes/S3Storage';
 
 dotenv.config();
 
-const { VAGALUME_API_URL, VAGALUME_API_KEY } = process.env;
+const { VAGALUME_API_URL, VAGALUME_API_KEY, AWS_S3_BUCKET_URL } = process.env;
 const s3Storage = new S3Storage();
 
 async function verifyMusicAndCategory(name: string, categoryId: number): Promise<void> {
@@ -137,9 +137,23 @@ async function update(
   await musicRepository.update(musicId, musicUpdateObj);
 }
 
+async function findMusic(musicId: number): Promise<Music> {
+  const isMusic: Music | null = await musicRepository.findById(musicId);
+
+  if (!isMusic) {
+    throw errors.notFound('music', 'musics');
+  }
+
+  return {
+    ...isMusic,
+    sheetMusicFile: isMusic.sheetMusicFile ? `${AWS_S3_BUCKET_URL}/${isMusic.sheetMusicFile}` : isMusic.sheetMusicFile,
+  };
+}
+
 const musicService = {
   insert,
   update,
+  findMusic,
 };
 
 export default musicService;
