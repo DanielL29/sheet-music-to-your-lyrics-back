@@ -14,9 +14,9 @@ const signInSchema: ObjectSchema<UserInsertData> = Joi.object({
   password: Joi.string().min(6).required(),
 });
 
-const userSchema = {
+const userSchemas = {
   signUpSchema,
   signInSchema,
 };
 
-export default userSchema;
+export default userSchemas;
