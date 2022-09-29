@@ -33,7 +33,7 @@ model Category {
 
 model Music {
   id                Int                @id @default(autoincrement())
-  name              String
+  name              String             @unique
   lyric             String
   author            String
   translatedLyric   String?
