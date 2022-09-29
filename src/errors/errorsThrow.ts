@@ -5,10 +5,10 @@ function unprocessableEntity(err: string): Object {
   };
 }
 
-function notFound(err: string, errPlural: string): object {
+function notFound(err?: string, errPlural?: string, anotherErr?: string): object {
   return {
     type: 'error_not_found',
-    message: `This ${err} was not founded, it doesn't be in ${errPlural} datas`,
+    message: anotherErr ?? `This ${err} was not founded, it doesn't be in ${errPlural} datas`,
   };
 }
 

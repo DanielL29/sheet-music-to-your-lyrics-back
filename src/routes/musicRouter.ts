@@ -8,6 +8,6 @@ import validateToken from '../middlewares/validateToken';
 const musicRouter = Router();
 const upload = multer(multerConfig);
 
-musicRouter.post('/create', validateToken, validateSchemas('music'), upload.single('sheetMusic'), musicController.insert);
+musicRouter.post('/create', validateToken, upload.single('sheetMusicFile'), validateSchemas('music'), musicController.insert);
 
 export default musicRouter;
