@@ -1,15 +1,16 @@
 import { ObjectSchema } from 'joi';
-import musicSchema from './musicSchema';
-import userSchema from './userSchema';
+import musicSchemas from './musicSchema';
+import userSchemas from './userSchema';
 
 export interface Schemas {
   [key: string]: ObjectSchema
 }
 
 const schemas: Schemas = {
-  signUp: userSchema.signUpSchema,
-  signIn: userSchema.signInSchema,
-  music: musicSchema,
+  signUp: userSchemas.signUpSchema,
+  signIn: userSchemas.signInSchema,
+  music: musicSchemas.insertSchema,
+  musicUpdate: musicSchemas.updateSchema,
 };
 
 export default schemas;
