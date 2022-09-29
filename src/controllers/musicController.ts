@@ -1,3 +1,4 @@
+import { Music } from '@prisma/client';
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
 import { MusicSchema, MusicUpdateData } from '../types/musicType';
@@ -21,9 +22,18 @@ async function update(req: Request, res: Response) {
   res.sendStatus(200);
 }
 
+async function getById(req: Request, res: Response) {
+  const musicId: number = Number(req.params.musicId);
+
+  const music: Music = await musicService.findMusic(musicId);
+
+  res.status(200).send(music);
+}
+
 const musicController = {
   insert,
   update,
+  getById,
 };
 
 export default musicController;
