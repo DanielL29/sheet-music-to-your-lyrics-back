@@ -31,6 +31,7 @@ module.exports = {
       },
     ],
     'no-unused-vars': 'off',
+    'no-undef': 'off',
     'no-plusplus': 0,
     'no-underscore-dangle': 'off',
     'no-param-reassign': 0,
