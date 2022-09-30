@@ -9,7 +9,9 @@ import S3Storage from '../classes/S3Storage';
 
 dotenv.config();
 
-const { VAGALUME_API_URL, VAGALUME_API_KEY, AWS_S3_BUCKET_URL } = process.env;
+const {
+  VAGALUME_API_URL, VAGALUME_API_KEY, AWS_S3_BUCKET_URL, NODE_ENV,
+} = process.env;
 const s3Storage = new S3Storage();
 
 async function verifyMusicAndCategory(name: string, categoryId: number): Promise<void> {
@@ -37,7 +39,7 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
     },
   });
 
-  if (musicFromVagalume?.type === 'notfound') {
+  if (musicFromVagalume?.type === 'notfound' || musicFromVagalume?.type === 'song_notfound') {
     throw errors.notFound(undefined, undefined, 'This music was not found in vagalume music datas, try a known music or verify if you wrote this right');
   }
 
@@ -73,13 +75,16 @@ async function insert(
   music: MusicSchema,
   sheetMusicFile: Express.Multer.File | undefined,
 ): Promise<void> {
+  let filename = music.sheetMusicFile;
   const {
     lyric, translatedLyric, name, author,
   } = await getMusicFromVagalume(music);
 
   await verifyMusicAndCategory(name, music.categoryId);
 
-  const filename = await insertFileInAWS(sheetMusicFile);
+  if (NODE_ENV !== 'test') {
+    filename = await insertFileInAWS(sheetMusicFile);
+  }
 
   await musicRepository.insert({
     ...music,
@@ -113,6 +118,19 @@ function buildUpdateObject(
   return musicUpdateObj;
 }
 
+async function updateFileiInAWS(
+  dbSheetMusicFile: string,
+  sheetMusicFile: Express.Multer.File | undefined,
+): Promise<void> {
+  if (dbSheetMusicFile && sheetMusicFile) {
+    await s3Storage.deleteFile(dbSheetMusicFile);
+
+    await s3Storage.saveFile(sheetMusicFile.filename);
+  } else if (sheetMusicFile) {
+    await s3Storage.saveFile(sheetMusicFile.filename);
+  }
+}
+
 async function update(
   musicId: number,
   music: MusicUpdateData,
@@ -124,12 +142,8 @@ async function update(
     throw errors.notFound('music', 'musics');
   }
 
-  if (isMusic.sheetMusicFile && sheetMusicFile) {
-    await s3Storage.deleteFile(isMusic.sheetMusicFile);
-
-    await s3Storage.saveFile(sheetMusicFile.filename);
-  } else if (sheetMusicFile) {
-    await s3Storage.saveFile(sheetMusicFile.filename);
+  if (NODE_ENV !== 'test') {
+    await updateFileiInAWS(isMusic.sheetMusicFile!, sheetMusicFile);
   }
 
   const musicUpdateObj = buildUpdateObject(music, sheetMusicFile);
