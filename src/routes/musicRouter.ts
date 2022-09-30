@@ -26,6 +26,6 @@ musicRouter.patch(
   musicController.update,
 );
 
-musicRouter.get('/:musicId', validateToken, musicController.getById);
+musicRouter.get('/find/:musicId', validateToken, musicController.getById);
 
 export default musicRouter;
