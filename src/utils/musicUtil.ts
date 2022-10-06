@@ -10,7 +10,6 @@ interface MusicLiterals {
   embedYoutubeUrls: (isMusic: Music) => {
     musicVideoUrl: string | null, musicHelpVideoUrl: string | null
   }
-  getAuthorImg: (author: string) => string
 }
 
 const CHORDS_REGEX = /(\(*[CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug|m|M|°|[0-9])*[(]?[\d/]*[)]?(?:[CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug|m|M|°|[0-9])*[\d/]*)*\)*)(?=[\s|$])(?! [a-z])/;
@@ -94,23 +93,6 @@ const musicUtil: MusicLiterals = {
     }
 
     return { musicVideoUrl: embedVideoUrl, musicHelpVideoUrl: embedHelpVideoUrl };
-  },
-  getAuthorImg: (author) => {
-    let formattedAuthorName = '';
-
-    if (author) {
-      const authorLower = author.toLowerCase();
-
-      for (let i = 0; i < authorLower.length; i++) {
-        if (authorLower[i] === ' ') {
-          formattedAuthorName += '-';
-        } else {
-          formattedAuthorName += authorLower[i];
-        }
-      }
-    }
-
-    return `https://www.vagalume.com.br/${formattedAuthorName}/images/${formattedAuthorName}.jpg`;
   },
 };
 
