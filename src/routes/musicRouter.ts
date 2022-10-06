@@ -28,4 +28,6 @@ musicRouter.patch(
 
 musicRouter.get('/find/:musicName', validateToken, musicController.getByName);
 
+musicRouter.get('/category/:categoryName', validateToken, musicController.getByCategory);
+
 export default musicRouter;
