@@ -1,7 +1,7 @@
 import { Music } from '@prisma/client';
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
-import { MusicSchema, MusicUpdateData } from '../types/musicType';
+import { MusicFind, MusicSchema, MusicUpdateData } from '../types/musicType';
 
 async function insert(req: Request, res: Response) {
   const music: MusicSchema = req.body;
@@ -13,19 +13,19 @@ async function insert(req: Request, res: Response) {
 }
 
 async function update(req: Request, res: Response) {
-  const musicId: number = Number(req.params.musicId);
+  const { musicName } = req.params;
   const music: MusicUpdateData = req.body;
   const sheetMusicFile: Express.Multer.File | undefined = req.file;
 
-  await musicService.update(musicId, music, sheetMusicFile);
+  await musicService.update(musicName, music, sheetMusicFile);
 
   res.sendStatus(200);
 }
 
-async function getById(req: Request, res: Response) {
-  const musicId: number = Number(req.params.musicId);
+async function getByName(req: Request, res: Response) {
+  const { musicName } = req.params;
 
-  const music: Music = await musicService.findMusic(musicId);
+  const music: MusicFind = await musicService.findMusic(musicName);
 
   res.status(200).send(music);
 }
@@ -33,7 +33,7 @@ async function getById(req: Request, res: Response) {
 const musicController = {
   insert,
   update,
-  getById,
+  getByName,
 };
 
 export default musicController;
