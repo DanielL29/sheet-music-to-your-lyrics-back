@@ -1,7 +1,9 @@
 import { Music } from '@prisma/client';
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
-import { MusicFind, MusicSchema, MusicUpdateData } from '../types/musicType';
+import {
+  MusicByCategory, MusicFind, MusicSchema, MusicUpdateData,
+} from '../types/musicType';
 
 async function insert(req: Request, res: Response) {
   const music: MusicSchema = req.body;
@@ -30,10 +32,19 @@ async function getByName(req: Request, res: Response) {
   res.status(200).send(music);
 }
 
+async function getByCategory(req: Request, res: Response) {
+  const { categoryName } = req.params;
+
+  const musicByCategory: MusicByCategory[] = await musicService.findMusicByCategory(categoryName);
+
+  res.status(200).send(musicByCategory);
+}
+
 const musicController = {
   insert,
   update,
   getByName,
+  getByCategory,
 };
 
 export default musicController;
