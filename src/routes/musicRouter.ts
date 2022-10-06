@@ -18,14 +18,14 @@ musicRouter.post(
 );
 
 musicRouter.patch(
-  '/update/:musicId',
+  '/update/:musicName',
   validateToken,
   upload.single('sheetMusicFile'),
-  validateSchemas('musicUpdate'),
   validateEmptyMusicUpdate,
+  validateSchemas('musicUpdate'),
   musicController.update,
 );
 
-musicRouter.get('/find/:musicId', validateToken, musicController.getById);
+musicRouter.get('/find/:musicName', validateToken, musicController.getByName);
 
 export default musicRouter;

@@ -3,16 +3,18 @@ import dotenv from 'dotenv';
 import axios from 'axios';
 import errors from '../errors/errorsThrow';
 import musicRepository from '../repositories/musicRepository';
-import { MusicSchema, MusicUpdateData, MusicVagalumeData } from '../types/musicType';
+import {
+  MusicFind, MusicSchema, MusicUpdateData, MusicVagalumeData,
+} from '../types/musicType';
 import categoryRepository from '../repositories/categoryRepository';
-import S3Storage from '../classes/S3Storage';
+import musicUtil from '../utils/musicUtil';
+import s3Util from '../utils/s3Util';
 
 dotenv.config();
 
 const {
   VAGALUME_API_URL, VAGALUME_API_KEY, AWS_S3_BUCKET_URL, NODE_ENV,
 } = process.env;
-const s3Storage = new S3Storage();
 
 async function verifyMusicAndCategory(name: string, categoryId: number): Promise<void> {
   const isMusic: Music | null = await musicRepository.findByName(name);
@@ -59,18 +61,6 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
   };
 }
 
-async function insertFileInAWS(
-  sheetMusicFile: Express.Multer.File | undefined,
-): Promise<string | null> {
-  if (!sheetMusicFile) {
-    return null;
-  }
-
-  await s3Storage.saveFile(sheetMusicFile.filename);
-
-  return sheetMusicFile.filename;
-}
-
 async function insert(
   music: MusicSchema,
   sheetMusicFile: Express.Multer.File | undefined,
@@ -83,7 +73,15 @@ async function insert(
   await verifyMusicAndCategory(name, music.categoryId);
 
   if (NODE_ENV !== 'test') {
-    filename = await insertFileInAWS(sheetMusicFile);
+    if (sheetMusicFile) {
+      const fileSize = Number(((sheetMusicFile.size / 1024) / 1024).toFixed(4));
+
+      if (fileSize > 2) {
+        throw errors.badRequest('File limit size is 2MB');
+      }
+    }
+
+    filename = await s3Util.insertFileInAWS(sheetMusicFile);
   }
 
   await musicRepository.insert({
@@ -97,70 +95,54 @@ async function insert(
   });
 }
 
-function buildUpdateObject(
-  musicUpdate: MusicUpdateData,
-  sheetMusicFile: Express.Multer.File | undefined,
-): MusicUpdateData {
-  const musicUpdateObj: any = {};
-
-  if (musicUpdate.musicHelpVideoUrl !== '') {
-    musicUpdateObj.musicHelpVideoUrl = musicUpdate.musicHelpVideoUrl;
-  }
-
-  if (musicUpdate.musicVideoUrl !== '') {
-    musicUpdateObj.musicVideoUrl = musicUpdate.musicVideoUrl;
-  }
-
-  if (sheetMusicFile) {
-    musicUpdateObj.sheetMusicFile = sheetMusicFile.filename;
-  }
-
-  return musicUpdateObj;
-}
-
-async function updateFileiInAWS(
-  dbSheetMusicFile: string,
-  sheetMusicFile: Express.Multer.File | undefined,
-): Promise<void> {
-  if (dbSheetMusicFile && sheetMusicFile) {
-    await s3Storage.deleteFile(dbSheetMusicFile);
-
-    await s3Storage.saveFile(sheetMusicFile.filename);
-  } else if (sheetMusicFile) {
-    await s3Storage.saveFile(sheetMusicFile.filename);
-  }
-}
-
 async function update(
-  musicId: number,
+  musicName: string,
   music: MusicUpdateData,
   sheetMusicFile: Express.Multer.File | undefined,
 ): Promise<void> {
-  const isMusic = await musicRepository.findById(musicId);
+  const isMusic = await musicRepository.findByName(musicName);
 
   if (!isMusic) {
     throw errors.notFound('music', 'musics');
   }
 
   if (NODE_ENV !== 'test') {
-    await updateFileiInAWS(isMusic.sheetMusicFile!, sheetMusicFile);
+    if (sheetMusicFile) {
+      const fileSize = Number(((sheetMusicFile.size / 1024) / 1024).toFixed(4));
+
+      if (fileSize > 2) {
+        throw errors.badRequest('File limit size is 2MB');
+      }
+    }
+
+    await s3Util.updateFileInAWS(isMusic.sheetMusicFile!, sheetMusicFile);
   }
 
-  const musicUpdateObj = buildUpdateObject(music, sheetMusicFile);
+  const musicUpdateObj = musicUtil.buildUpdateObject(music, sheetMusicFile);
 
-  await musicRepository.update(musicId, musicUpdateObj);
+  await musicRepository.update(musicName, musicUpdateObj);
 }
 
-async function findMusic(musicId: number): Promise<Music> {
-  const isMusic: Music | null = await musicRepository.findById(musicId);
+async function findMusic(musicName: string): Promise<MusicFind> {
+  const isMusic: Music | null = await musicRepository.findByName(musicName);
 
   if (!isMusic) {
     throw errors.notFound('music', 'musics');
   }
 
+  const { musicVideoUrl, musicHelpVideoUrl } = musicUtil.embedYoutubeUrls(isMusic);
+  const lyricToUpdate = musicUtil.formatLyricToUpdate(isMusic.lyric);
+  const authorImg = musicUtil.getAuthorImg(isMusic.author);
+
   return {
     ...isMusic,
+    translatedLyric: isMusic.translatedLyric ? isMusic.translatedLyric.split('[')[1].split(']') : null,
+    lyric: isMusic.lyric.split('\f'),
+    lyricToUpdate,
+    musicVideoUrl,
+    musicHelpVideoUrl,
     sheetMusicFile: isMusic.sheetMusicFile ? `${AWS_S3_BUCKET_URL}/${isMusic.sheetMusicFile}` : isMusic.sheetMusicFile,
+    authorImg,
   };
 }
 

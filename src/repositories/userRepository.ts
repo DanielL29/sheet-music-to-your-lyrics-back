@@ -10,9 +10,14 @@ async function insert(user: UserInsertData): Promise<void> {
   await prisma.user.create({ data: user });
 }
 
+async function findById(id: number): Promise<User | null> {
+  return prisma.user.findUnique({ where: { id } });
+}
+
 const userRepository = {
   findByEmail,
   insert,
+  findById,
 };
 
 export default userRepository;

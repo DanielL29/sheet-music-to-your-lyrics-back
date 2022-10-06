@@ -14,8 +14,8 @@ async function findById(id: number): Promise<Music | null> {
   return prisma.music.findUnique({ where: { id } });
 }
 
-async function update(id: number, music: MusicUpdateData): Promise<void> {
-  await prisma.music.update({ where: { id }, data: music });
+async function update(name: string, music: MusicUpdateData): Promise<void> {
+  await prisma.music.update({ where: { name }, data: music });
 }
 
 const musicRepository = {
