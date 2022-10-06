@@ -35,5 +35,6 @@ module.exports = {
     'no-plusplus': 0,
     'no-underscore-dangle': 'off',
     'no-param-reassign': 0,
+    'no-shadow': 'off',
   },
 };
