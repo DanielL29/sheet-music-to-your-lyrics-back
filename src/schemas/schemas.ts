@@ -1,5 +1,6 @@
 import { ObjectSchema } from 'joi';
 import musicSchemas from './musicSchema';
+import musicSnippetSchemas from './musicSnippetSchema';
 import userSchemas from './userSchema';
 
 export interface Schemas {
@@ -7,10 +8,11 @@ export interface Schemas {
 }
 
 const schemas: Schemas = {
-  signUp: userSchemas.signUpSchema,
-  signIn: userSchemas.signInSchema,
-  music: musicSchemas.insertSchema,
-  musicUpdate: musicSchemas.updateSchema,
+  signUp: userSchemas.signUp,
+  signIn: userSchemas.signIn,
+  music: musicSchemas.insert,
+  musicUpdate: musicSchemas.update,
+  musicSnippet: musicSnippetSchemas.insert,
 };
 
 export default schemas;
