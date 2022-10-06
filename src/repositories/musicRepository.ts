@@ -1,9 +1,12 @@
 import { Music } from '@prisma/client';
 import prisma from '../database';
-import { MusicInsertData, MusicUpdateData } from '../types/musicType';
+import { MusicByCategory, MusicInsertData, MusicUpdateData } from '../types/musicType';
 
 async function findByName(name: string): Promise<Music | null> {
-  return prisma.music.findUnique({ where: { name } });
+  return prisma.music.findUnique({
+    where: { name },
+    include: { authors: { select: { name: true, imageUrl: true } } },
+  });
 }
 
 async function insert(music: MusicInsertData): Promise<void> {
@@ -18,11 +21,19 @@ async function update(name: string, music: MusicUpdateData): Promise<void> {
   await prisma.music.update({ where: { name }, data: music });
 }
 
+async function findByCategory(categoryName: string): Promise<MusicByCategory[]> {
+  return prisma.music.findMany({
+    where: { categories: { name: categoryName } },
+    select: { id: true, name: true, authors: { select: { name: true } } },
+  });
+}
+
 const musicRepository = {
   insert,
   findByName,
   findById,
   update,
+  findByCategory,
 };
 
 export default musicRepository;
