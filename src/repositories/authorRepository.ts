@@ -14,10 +14,15 @@ async function findByCategory(category: string): Promise<Author[]> {
   return prisma.author.findMany({ where: { categories: { name: category } } });
 }
 
+async function findAll(): Promise<Author[]> {
+  return prisma.author.findMany({ include: { categories: { select: { name: true } } } });
+}
+
 const authorRepository = {
   findByName,
   insert,
   findByCategory,
+  findAll,
 };
 
 export default authorRepository;
