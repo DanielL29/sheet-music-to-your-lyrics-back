@@ -50,12 +50,19 @@ async function getByAuthor(req: Request, res: Response) {
   res.status(200).send(musicByAuthor);
 }
 
+async function getAll(_: Request, res: Response) {
+  const musics: Music[] = await musicService.findMusics();
+
+  res.status(200).send(musics);
+}
+
 const musicController = {
   insert,
   update,
   getByName,
   getByCategory,
   getByAuthor,
+  getAll,
 };
 
 export default musicController;
