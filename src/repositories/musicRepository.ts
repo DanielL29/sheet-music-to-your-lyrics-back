@@ -34,6 +34,15 @@ async function findByAuthor(authorName: string): Promise<Music[]> {
   });
 }
 
+async function findAll(): Promise<Music[]> {
+  return prisma.music.findMany({
+    include: {
+      authors: { select: { name: true } },
+      categories: { select: { name: true } },
+    },
+  });
+}
+
 const musicRepository = {
   insert,
   findByName,
@@ -41,6 +50,7 @@ const musicRepository = {
   update,
   findByCategory,
   findByAuthor,
+  findAll,
 };
 
 export default musicRepository;
