@@ -1,4 +1,4 @@
-import { Music } from '@prisma/client';
+import { Author, Music } from '@prisma/client';
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
 import {
@@ -40,11 +40,22 @@ async function getByCategory(req: Request, res: Response) {
   res.status(200).send(musicByCategory);
 }
 
+async function getByAuthor(req: Request, res: Response) {
+  const { authorName } = req.params;
+
+  const musicByAuthor: {
+    author: Author, musics: Music[]
+  } = await musicService.findMusicByAuthor(authorName);
+
+  res.status(200).send(musicByAuthor);
+}
+
 const musicController = {
   insert,
   update,
   getByName,
   getByCategory,
+  getByAuthor,
 };
 
 export default musicController;
