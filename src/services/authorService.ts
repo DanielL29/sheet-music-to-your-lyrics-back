@@ -1,12 +1,25 @@
-import { Author } from '@prisma/client';
+import { Author, Category } from '@prisma/client';
+import errors from '../errors/errorsThrow';
 import authorRepository from '../repositories/authorRepository';
+import categoryRepository from '../repositories/categoryRepository';
 
-async function findByCategory(category: string): Promise<Author[]> {
+async function findAuthorByCategory(category: string): Promise<Author[]> {
+  const isCategory: Category | null = await categoryRepository.findByName(category);
+
+  if (!isCategory) {
+    throw errors.notFound('category', 'categories');
+  }
+
   return authorRepository.findByCategory(category);
 }
 
+async function findAuthors(): Promise<Author[]> {
+  return authorRepository.findAll();
+}
+
 const authorService = {
-  findByCategory,
+  findAuthorByCategory,
+  findAuthors,
 };
 
 export default authorService;
