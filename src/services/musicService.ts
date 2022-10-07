@@ -194,12 +194,17 @@ async function findMusicByAuthor(authorName: string): Promise<{ author: Author, 
   };
 }
 
+async function findMusics(): Promise<Music[]> {
+  return musicRepository.findAll();
+}
+
 const musicService = {
   insert,
   update,
   findMusic,
   findMusicByCategory,
   findMusicByAuthor,
+  findMusics,
 };
 
 export default musicService;
