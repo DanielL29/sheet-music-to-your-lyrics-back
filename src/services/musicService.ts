@@ -170,7 +170,28 @@ async function findMusic(musicName: string): Promise<MusicFind> {
 }
 
 async function findMusicByCategory(categoryName: string): Promise<MusicByCategory[]> {
+  const isCategory: Category | null = await categoryRepository.findByName(categoryName);
+
+  if (!isCategory) {
+    throw errors.notFound('category', 'categories');
+  }
+
   return musicRepository.findByCategory(categoryName);
+}
+
+async function findMusicByAuthor(authorName: string): Promise<{ author: Author, musics: Music[] }> {
+  const isAuthor: Author | null = await authorRepository.findByName(authorName);
+
+  if (!isAuthor) {
+    throw errors.notFound('author', 'authors');
+  }
+
+  const musicsByAuthor: Music[] = await musicRepository.findByAuthor(authorName);
+
+  return {
+    author: isAuthor,
+    musics: musicsByAuthor,
+  };
 }
 
 const musicService = {
@@ -178,6 +199,7 @@ const musicService = {
   update,
   findMusic,
   findMusicByCategory,
+  findMusicByAuthor,
 };
 
 export default musicService;
