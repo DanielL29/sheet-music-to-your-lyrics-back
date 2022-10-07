@@ -28,12 +28,19 @@ async function findByCategory(categoryName: string): Promise<MusicByCategory[]> 
   });
 }
 
+async function findByAuthor(authorName: string): Promise<Music[]> {
+  return prisma.music.findMany({
+    where: { authors: { name: authorName } },
+  });
+}
+
 const musicRepository = {
   insert,
   findByName,
   findById,
   update,
   findByCategory,
+  findByAuthor,
 };
 
 export default musicRepository;

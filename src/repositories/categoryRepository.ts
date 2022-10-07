@@ -5,6 +5,10 @@ async function findById(id: number): Promise<Category | null> {
   return prisma.category.findUnique({ where: { id } });
 }
 
+async function findByName(name: string): Promise<Category | null> {
+  return prisma.category.findUnique({ where: { name } });
+}
+
 async function findAll(): Promise<Category[]> {
   return prisma.category.findMany();
 }
@@ -12,6 +16,7 @@ async function findAll(): Promise<Category[]> {
 const categoryRepository = {
   findById,
   findAll,
+  findByName,
 };
 
 export default categoryRepository;
