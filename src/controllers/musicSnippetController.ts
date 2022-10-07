@@ -14,7 +14,7 @@ async function insert(req: Request, res: Response) {
   res.sendStatus(201);
 }
 
-async function findMusicSnippets(req: Request, res: Response) {
+async function getMusicSnippets(req: Request, res: Response) {
   const { musicName } = req.params;
 
   const musicSnippets: MusicSnippet[] = await musicSnippetService.findMusicSnippets(musicName);
@@ -24,7 +24,7 @@ async function findMusicSnippets(req: Request, res: Response) {
 
 const musicSnippetController = {
   insert,
-  findMusicSnippets,
+  getMusicSnippets,
 };
 
 export default musicSnippetController;

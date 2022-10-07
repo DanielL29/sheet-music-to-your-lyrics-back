@@ -26,24 +26,38 @@ model User {
 model Category {
   id        Int      @id @default(autoincrement())
   name      String   @unique
-  imageUrl  String?
+  imageUrl  String
   createdAt DateTime @default(now())
   musics    Music[]
+  authors   Author[]
 
   @@map("categories")
+}
+
+model Author {
+  id         Int      @id @default(autoincrement())
+  name       String   @unique
+  imageUrl   String
+  categories Category @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  createdAt  DateTime @default(now())
+  musics     Music[]
+
+  @@map("authors")
 }
 
 model Music {
   id                Int                @id @default(autoincrement())
   name              String             @unique
   lyric             String
-  author            String
   translatedLyric   String?
   sheetMusicFile    String?
   musicVideoUrl     String?
   musicHelpVideoUrl String?
   categories        Category           @relation(fields: [categoryId], references: [id])
   categoryId        Int
+  authors           Author             @relation(fields: [authorId], references: [id])
+  authorId          Int
   createdAt         DateTime           @default(now())
   musicContributors MusicContributor[]
   musicSnippets     MusicSnippet[]

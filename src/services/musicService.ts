@@ -1,14 +1,16 @@
-import { Category, Music } from '@prisma/client';
+import { Author, Category, Music } from '@prisma/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import errors from '../errors/errorsThrow';
 import musicRepository from '../repositories/musicRepository';
 import {
+  MusicByCategory,
   MusicFind, MusicSchema, MusicUpdateData, MusicVagalumeData,
 } from '../types/musicType';
 import categoryRepository from '../repositories/categoryRepository';
 import musicUtil from '../utils/musicUtil';
 import s3Util from '../utils/s3Util';
+import authorRepository from '../repositories/authorRepository';
 
 dotenv.config();
 
@@ -30,6 +32,25 @@ async function verifyMusicAndCategory(name: string, categoryId: number): Promise
   }
 }
 
+async function insertOrFindAuthor(music: MusicSchema, musicFromVagalume: any): Promise<number> {
+  const isAuthor: Author | null = await authorRepository.findByName(musicFromVagalume.art.name);
+  let authorId;
+
+  if (isAuthor) {
+    authorId = isAuthor.id;
+  } else {
+    const insertedAuthor: Author = await authorRepository.insert({
+      name: musicFromVagalume.art.name,
+      imageUrl: musicFromVagalume.art.pic_medium,
+      categoryId: Number(music.categoryId),
+    });
+
+    authorId = insertedAuthor.id;
+  }
+
+  return authorId;
+}
+
 async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeData> {
   let translatedLyric = null;
 
@@ -38,6 +59,7 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
       art: music.author,
       mus: music.name,
       apiKey: VAGALUME_API_KEY!,
+      extra: 'artpic',
     },
   });
 
@@ -53,11 +75,13 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
     translatedLyric = findTranslated.text;
   }
 
+  const authorId: number = await insertOrFindAuthor(music, musicFromVagalume);
+
   return {
     lyric: musicFromVagalume.mus[0].text,
     translatedLyric,
     name: musicFromVagalume.mus[0].name,
-    author: musicFromVagalume.art.name,
+    authorId,
   };
 }
 
@@ -67,7 +91,7 @@ async function insert(
 ): Promise<void> {
   let filename = music.sheetMusicFile;
   const {
-    lyric, translatedLyric, name, author,
+    lyric, translatedLyric, name, authorId,
   } = await getMusicFromVagalume(music);
 
   await verifyMusicAndCategory(name, music.categoryId);
@@ -85,8 +109,9 @@ async function insert(
   }
 
   await musicRepository.insert({
-    ...music,
-    author,
+    musicVideoUrl: music.musicVideoUrl,
+    musicHelpVideoUrl: music.musicHelpVideoUrl,
+    authorId,
     name,
     categoryId: Number(music.categoryId),
     sheetMusicFile: filename,
@@ -132,7 +157,6 @@ async function findMusic(musicName: string): Promise<MusicFind> {
 
   const { musicVideoUrl, musicHelpVideoUrl } = musicUtil.embedYoutubeUrls(isMusic);
   const lyricToUpdate = musicUtil.formatLyricToUpdate(isMusic.lyric);
-  const authorImg = musicUtil.getAuthorImg(isMusic.author);
 
   return {
     ...isMusic,
@@ -142,14 +166,18 @@ async function findMusic(musicName: string): Promise<MusicFind> {
     musicVideoUrl,
     musicHelpVideoUrl,
     sheetMusicFile: isMusic.sheetMusicFile ? `${AWS_S3_BUCKET_URL}/${isMusic.sheetMusicFile}` : isMusic.sheetMusicFile,
-    authorImg,
   };
+}
+
+async function findMusicByCategory(categoryName: string): Promise<MusicByCategory[]> {
+  return musicRepository.findByCategory(categoryName);
 }
 
 const musicService = {
   insert,
   update,
   findMusic,
+  findMusicByCategory,
 };
 
 export default musicService;

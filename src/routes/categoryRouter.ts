@@ -4,6 +4,6 @@ import validateToken from '../middlewares/validateToken';
 
 const categoryRouter = Router();
 
-categoryRouter.get('/', validateToken, categoryController.findAll);
+categoryRouter.get('/', validateToken, categoryController.getAll);
 
 export default categoryRouter;
