@@ -14,10 +14,15 @@ async function findById(id: number): Promise<User | null> {
   return prisma.user.findUnique({ where: { id } });
 }
 
+async function updateMakeTeacher(email: string): Promise<User> {
+  return prisma.user.update({ where: { email }, data: { teacher: true } });
+}
+
 const userRepository = {
   findByEmail,
   insert,
   findById,
+  updateMakeTeacher,
 };
 
 export default userRepository;
