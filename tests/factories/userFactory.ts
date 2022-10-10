@@ -12,6 +12,7 @@ function __createUser() {
     name: faker.name.fullName(),
     email: faker.internet.email(),
     password: faker.internet.password(),
+    teacher: false,
   };
 }
 

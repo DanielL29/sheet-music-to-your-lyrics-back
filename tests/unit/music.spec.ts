@@ -15,9 +15,18 @@ describe('POST /musics/create', () => {
 
     jest.spyOn(musicRepository, 'findByName').mockResolvedValueOnce(null);
     jest.spyOn(musicRepository, 'insert').mockResolvedValueOnce();
-    jest.spyOn(categoryRepository, 'findById').mockResolvedValueOnce({ id: 1, name: 'Pop', createdAt: new Date() });
+    jest.spyOn(categoryRepository, 'findById').mockResolvedValueOnce({
+      id: 1, name: 'Pop', imageUrl: 'https://http.cat/411.jpg', createdAt: new Date(),
+    });
 
-    await expect(musicService.insert(music, undefined)).resolves.not.toThrow();
+    await expect(musicService.insert({
+      name: music.name,
+      author: 'Ed Sheeran',
+      categoryId: music.categoryId,
+      musicHelpVideoUrl: music.musicHelpVideoUrl,
+      musicVideoUrl: music.musicVideoUrl,
+      sheetMusicFile: music.sheetMusicFile,
+    }, undefined)).resolves.not.toThrow();
 
     expect(musicRepository.findByName).toBeCalledWith(music.name);
     expect(categoryRepository.findById).toBeCalledWith(music.categoryId);
@@ -35,7 +44,14 @@ describe('POST /musics/create', () => {
       createdAt: new Date(),
     });
 
-    await expect(musicService.insert(music, undefined)).rejects.toEqual(errors.conflict('music is', 'registered'));
+    await expect(musicService.insert({
+      name: music.name,
+      author: 'Ed Sheeran',
+      categoryId: music.categoryId,
+      musicHelpVideoUrl: music.musicHelpVideoUrl,
+      musicVideoUrl: music.musicVideoUrl,
+      sheetMusicFile: music.sheetMusicFile,
+    }, undefined)).rejects.toEqual(errors.conflict('music is', 'registered'));
 
     expect(musicRepository.findByName).toBeCalledWith(music.name);
     expect(categoryRepository.findById).not.toBeCalled();
@@ -48,7 +64,14 @@ describe('POST /musics/create', () => {
     jest.spyOn(musicRepository, 'findByName').mockResolvedValueOnce(null);
     jest.spyOn(categoryRepository, 'findById').mockResolvedValueOnce(null);
 
-    await expect(musicService.insert(music, undefined)).rejects.toEqual(errors.notFound('category', 'categories'));
+    await expect(musicService.insert({
+      name: music.name,
+      author: 'Ed Sheeran',
+      categoryId: music.categoryId,
+      musicHelpVideoUrl: music.musicHelpVideoUrl,
+      musicVideoUrl: music.musicVideoUrl,
+      sheetMusicFile: music.sheetMusicFile,
+    }, undefined)).rejects.toEqual(errors.notFound('category', 'categories'));
 
     expect(musicRepository.findByName).toBeCalledWith(music.name);
     expect(categoryRepository.findById).toBeCalledWith(music.categoryId);
@@ -59,12 +82,18 @@ describe('POST /musics/create', () => {
     const music = musicFactory.__createMusic();
 
     jest.spyOn(musicRepository, 'findByName').mockResolvedValueOnce(null);
-    jest.spyOn(categoryRepository, 'findById').mockResolvedValueOnce({ id: 1, name: 'Pop', createdAt: new Date() });
+    jest.spyOn(categoryRepository, 'findById').mockResolvedValueOnce({
+      id: 1, name: 'Pop', imageUrl: 'https://http.cat/411.jpg', createdAt: new Date(),
+    });
 
     await expect(
       musicService.insert({
-        ...music,
-        name: 'unknown music to crash in sheet music to your lyrcs app',
+        name: music.name,
+        author: 'Ed Sheeran',
+        categoryId: music.categoryId,
+        musicHelpVideoUrl: music.musicHelpVideoUrl,
+        musicVideoUrl: music.musicVideoUrl,
+        sheetMusicFile: music.sheetMusicFile,
       }, undefined),
     ).rejects.toEqual(
       errors.notFound(
@@ -87,7 +116,7 @@ describe('PATCH /musics/update/:musicId', () => {
     jest.spyOn(musicRepository, 'findById').mockResolvedValueOnce(music);
     jest.spyOn(musicRepository, 'update').mockResolvedValueOnce();
 
-    await expect(musicService.update(1, {
+    await expect(musicService.update(music.name, {
       sheetMusicFile: music.sheetMusicFile,
       musicVideoUrl: music.musicVideoUrl,
       musicHelpVideoUrl: music.musicHelpVideoUrl,
@@ -103,7 +132,7 @@ describe('PATCH /musics/update/:musicId', () => {
     jest.spyOn(musicRepository, 'findById').mockResolvedValueOnce(null);
     jest.spyOn(musicRepository, 'update').mockResolvedValueOnce();
 
-    await expect(musicService.update(1, {
+    await expect(musicService.update(music.name, {
       sheetMusicFile: music.sheetMusicFile,
       musicVideoUrl: music.musicVideoUrl,
       musicHelpVideoUrl: music.musicHelpVideoUrl,
@@ -122,7 +151,7 @@ describe('GET /musics/find/:musicId', () => {
 
     jest.spyOn(musicRepository, 'findById').mockResolvedValueOnce(music);
 
-    const musicFound = await musicService.findMusic(music.id);
+    const musicFound = await musicService.findMusic(music.name);
 
     expect(musicFound).toEqual(
       expect.objectContaining({ ...music, sheetMusicFile: sheetMusicFileUrl }),
@@ -133,7 +162,7 @@ describe('GET /musics/find/:musicId', () => {
   it('expect to not found music id and throw not found', async () => {
     jest.spyOn(musicRepository, 'findById').mockResolvedValueOnce(null);
 
-    await expect(musicService.findMusic(-1)).rejects.toEqual(errors.notFound('music', 'musics'));
+    await expect(musicService.findMusic('qweqasdasdcsdsdvsd')).rejects.toEqual(errors.notFound('music', 'musics'));
 
     expect(musicRepository.findById).toBeCalledWith(-1);
   });
