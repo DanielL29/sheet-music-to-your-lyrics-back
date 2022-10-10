@@ -3,7 +3,7 @@ import {
 } from '@prisma/client';
 import dotenv from 'dotenv';
 import errors from '../errors/errorsThrow';
-import musicContributorsRepository from '../repositories/musicContributors';
+import musicContributorsRepository from '../repositories/musicContributorRepository';
 import musicRepository from '../repositories/musicRepository';
 import musicSnippetRepository from '../repositories/musicSnippetRepository';
 import userRepository from '../repositories/userRepository';
