@@ -33,5 +33,6 @@ musicRouter.get('/find/:musicName', validateToken, musicController.getByName);
 musicRouter.get('/category/:categoryName', validateToken, musicController.getByCategory);
 musicRouter.get('/author/:authorName', validateToken, musicController.getByAuthor);
 musicRouter.get('/', validateToken, musicController.getAll);
+musicRouter.get('/search', validateToken, musicController.getSearch);
 
 export default musicRouter;
