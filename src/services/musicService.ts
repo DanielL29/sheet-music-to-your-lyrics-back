@@ -4,7 +4,6 @@ import axios from 'axios';
 import errors from '../errors/errorsThrow';
 import musicRepository from '../repositories/musicRepository';
 import {
-  MusicByCategory,
   MusicFind, MusicSchema, MusicUpdateData, MusicVagalumeData,
 } from '../types/musicType';
 import categoryRepository from '../repositories/categoryRepository';
@@ -171,7 +170,7 @@ async function findMusic(musicName: string): Promise<MusicFind> {
   };
 }
 
-async function findMusicByCategory(categoryName: string): Promise<MusicByCategory[]> {
+async function findMusicByCategory(categoryName: string): Promise<Music[]> {
   const isCategory: Category | null = await categoryRepository.findByName(categoryName);
 
   if (!isCategory) {
@@ -200,6 +199,26 @@ async function findMusics(): Promise<Music[]> {
   return musicRepository.findAll();
 }
 
+async function findSearch(text: string): Promise<Music[]> {
+  if (!text) {
+    return [];
+  }
+
+  const isCategory: Category | null = await categoryRepository.findByName(text, true);
+
+  if (isCategory) {
+    return musicRepository.findByCategory(isCategory.name);
+  }
+
+  const isAuthor: Author | null = await authorRepository.findByName(text, true);
+
+  if (isAuthor) {
+    return musicRepository.findByAuthor(isAuthor.name);
+  }
+
+  return musicRepository.findSearch(text);
+}
+
 const musicService = {
   insert,
   update,
@@ -207,6 +226,7 @@ const musicService = {
   findMusicByCategory,
   findMusicByAuthor,
   findMusics,
+  findSearch,
 };
 
 export default musicService;

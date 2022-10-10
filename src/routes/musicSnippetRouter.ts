@@ -10,7 +10,24 @@ const musicSnippetRouter = Router();
 
 const upload = multer(multerConfig);
 
-musicSnippetRouter.post('/:musicName/create', validateToken, validateTeacher, upload.single('snippetAid'), validateSchemas('musicSnippet'), musicSnippetController.insert);
+musicSnippetRouter.post(
+  '/:musicName/create',
+  validateToken,
+  validateTeacher,
+  upload.single('snippetAid'),
+  validateSchemas('musicSnippet'),
+  musicSnippetController.insert,
+);
+
 musicSnippetRouter.get('/:musicName/snippets', validateToken, musicSnippetController.getMusicSnippets);
+
+musicSnippetRouter.patch(
+  '/:musicSnippetId/update',
+  validateToken,
+  validateTeacher,
+  upload.single('snippetAid'),
+  validateSchemas('musicSnippetUpdate'),
+  musicSnippetController.update,
+);
 
 export default musicSnippetRouter;

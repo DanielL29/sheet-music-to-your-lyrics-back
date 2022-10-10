@@ -10,14 +10,6 @@ export interface MusicVagalumeData {
   authorId: number
 }
 
-export interface MusicByCategory {
-  id: number
-  name: string
-  authors: {
-    name: string
-  }
-}
-
 export type MusicFind = Omit<Music, 'lyric' | 'translatedLyric'> & {
   lyricToUpdate: string
   lyric: string[]

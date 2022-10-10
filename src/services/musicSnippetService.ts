@@ -1,6 +1,9 @@
-import { Music, MusicSnippet, User } from '@prisma/client';
+import {
+  Music, MusicContributor, MusicSnippet, User,
+} from '@prisma/client';
 import dotenv from 'dotenv';
 import errors from '../errors/errorsThrow';
+import musicContributorsRepository from '../repositories/musicContributors';
 import musicRepository from '../repositories/musicRepository';
 import musicSnippetRepository from '../repositories/musicSnippetRepository';
 import userRepository from '../repositories/userRepository';
@@ -12,7 +15,11 @@ dotenv.config();
 
 const { AWS_S3_BUCKET_URL } = process.env;
 
-async function verifyUserAndMusic(userId: number, musicName: string): Promise<Music> {
+async function verifyDatas(
+  userId: number,
+  musicName: string,
+  musicSnippet: string,
+): Promise<Music> {
   const isUser: User | null = await userRepository.findById(userId);
 
   if (!isUser) {
@@ -25,7 +32,25 @@ async function verifyUserAndMusic(userId: number, musicName: string): Promise<Mu
     throw errors.notFound('music', 'musics');
   }
 
+  const isMusicSnippet: MusicSnippet | null = await musicSnippetRepository.findSnippet(
+    isMusic.id,
+    musicSnippet,
+  );
+
+  if (isMusicSnippet) {
+    throw errors.conflict('snippet is', 'registered');
+  }
+
   return isMusic;
+}
+
+async function insertContributor(musicId: number, userId: number) {
+  const isMusicContributor: MusicContributor | null = await musicContributorsRepository
+    .findByMusicAndUser(musicId, userId);
+
+  if (!isMusicContributor) {
+    await musicContributorsRepository.insert(musicId, userId);
+  }
 }
 
 async function insert(
@@ -34,7 +59,7 @@ async function insert(
   musicSnippet: MusicSnippetInsertData,
   snippetAidFile: Express.Multer.File | undefined,
 ): Promise<void> {
-  const isMusic = await verifyUserAndMusic(userId, musicName);
+  const isMusic = await verifyDatas(userId, musicName, musicSnippet.musicSnippet);
 
   const formattedMusicSnippet: string = musicSnippetUtil.formatMusicSnippet(isMusic, musicSnippet);
 
@@ -61,6 +86,7 @@ async function insert(
     } : { ...musicSnippet, musicSnippet: formattedMusicSnippet },
   );
   await musicRepository.update(musicName, { lyric: lyricUpdateWithSnippet });
+  await insertContributor(isMusic.id, userId);
 }
 
 async function findMusicSnippets(musicName: string): Promise<MusicSnippet[]> {
@@ -84,9 +110,33 @@ async function findMusicSnippets(musicName: string): Promise<MusicSnippet[]> {
   });
 }
 
+async function update(
+  userId: number,
+  musicSnippetId: number,
+  snippetAid: string,
+  snippetAidFile: Express.Multer.File | undefined,
+): Promise<void> {
+  const isMusicSnippet: MusicSnippet | null = await musicSnippetRepository.findById(musicSnippetId);
+
+  if (!isMusicSnippet) {
+    throw errors.notFound('music snippet', 'music snippets');
+  }
+
+  if (snippetAidFile) {
+    s3Util.updateFileInAWS(isMusicSnippet.snippetAid, snippetAidFile);
+  }
+
+  await musicSnippetRepository.update(
+    musicSnippetId,
+    snippetAidFile ? snippetAidFile.filename : snippetAid,
+  );
+  await insertContributor(isMusicSnippet.musicId, userId);
+}
+
 const musicSnippetService = {
   insert,
   findMusicSnippets,
+  update,
 };
 
 export default musicSnippetService;

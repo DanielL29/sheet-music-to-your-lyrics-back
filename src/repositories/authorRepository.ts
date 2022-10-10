@@ -2,7 +2,11 @@ import { Author } from '@prisma/client';
 import prisma from '../database';
 import { AuthorInsertData } from '../types/authorType';
 
-async function findByName(name: string): Promise<Author | null> {
+async function findByName(name: string, insensitive: boolean = false): Promise<Author | null> {
+  if (insensitive) {
+    return prisma.author.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
+  }
+
   return prisma.author.findUnique({ where: { name } });
 }
 

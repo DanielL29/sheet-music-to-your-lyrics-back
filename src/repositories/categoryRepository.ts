@@ -5,7 +5,11 @@ async function findById(id: number): Promise<Category | null> {
   return prisma.category.findUnique({ where: { id } });
 }
 
-async function findByName(name: string): Promise<Category | null> {
+async function findByName(name: string, insensitive: boolean = false): Promise<Category | null> {
+  if (insensitive) {
+    return prisma.category.findFirst({ where: { name: { equals: name, mode: 'insensitive' } } });
+  }
+
   return prisma.category.findUnique({ where: { name } });
 }
 
