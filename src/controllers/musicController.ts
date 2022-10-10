@@ -2,7 +2,7 @@ import { Author, Music } from '@prisma/client';
 import { Request, Response } from 'express';
 import musicService from '../services/musicService';
 import {
-  MusicByCategory, MusicFind, MusicSchema, MusicUpdateData,
+  MusicFind, MusicSchema, MusicUpdateData,
 } from '../types/musicType';
 
 async function insert(req: Request, res: Response) {
@@ -35,7 +35,7 @@ async function getByName(req: Request, res: Response) {
 async function getByCategory(req: Request, res: Response) {
   const { categoryName } = req.params;
 
-  const musicByCategory: MusicByCategory[] = await musicService.findMusicByCategory(categoryName);
+  const musicByCategory: Music[] = await musicService.findMusicByCategory(categoryName);
 
   res.status(200).send(musicByCategory);
 }
@@ -56,6 +56,14 @@ async function getAll(_: Request, res: Response) {
   res.status(200).send(musics);
 }
 
+async function getSearch(req: Request, res: Response) {
+  const textQuery: any = req.query.text;
+
+  const musicSearch: Music[] = await musicService.findSearch(textQuery);
+
+  res.status(200).send(musicSearch);
+}
+
 const musicController = {
   insert,
   update,
@@ -63,6 +71,7 @@ const musicController = {
   getByCategory,
   getByAuthor,
   getAll,
+  getSearch,
 };
 
 export default musicController;
