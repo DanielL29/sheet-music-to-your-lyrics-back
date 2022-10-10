@@ -1,6 +1,6 @@
 import { Music } from '@prisma/client';
 import prisma from '../database';
-import { MusicByCategory, MusicInsertData, MusicUpdateData } from '../types/musicType';
+import { MusicInsertData, MusicUpdateData } from '../types/musicType';
 
 async function findByName(name: string): Promise<Music | null> {
   return prisma.music.findUnique({
@@ -24,21 +24,38 @@ async function update(name: string, music: MusicUpdateData): Promise<void> {
   await prisma.music.update({ where: { name }, data: music });
 }
 
-async function findByCategory(categoryName: string): Promise<MusicByCategory[]> {
+async function findByCategory(categoryName: string): Promise<Music[]> {
   return prisma.music.findMany({
     where: { categories: { name: categoryName } },
-    select: { id: true, name: true, authors: { select: { name: true } } },
+    include: {
+      authors: { select: { name: true } },
+      categories: { select: { name: true } },
+    },
   });
 }
 
 async function findByAuthor(authorName: string): Promise<Music[]> {
   return prisma.music.findMany({
     where: { authors: { name: authorName } },
+    include: {
+      authors: { select: { name: true } },
+      categories: { select: { name: true } },
+    },
   });
 }
 
 async function findAll(): Promise<Music[]> {
   return prisma.music.findMany({
+    include: {
+      authors: { select: { name: true } },
+      categories: { select: { name: true } },
+    },
+  });
+}
+
+async function findSearch(text: string): Promise<Music[]> {
+  return prisma.music.findMany({
+    where: { name: { contains: text, mode: 'insensitive' } },
     include: {
       authors: { select: { name: true } },
       categories: { select: { name: true } },
@@ -54,6 +71,7 @@ const musicRepository = {
   findByCategory,
   findByAuthor,
   findAll,
+  findSearch,
 };
 
 export default musicRepository;
