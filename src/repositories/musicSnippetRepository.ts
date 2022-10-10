@@ -1,5 +1,4 @@
 import { MusicSnippet } from '@prisma/client';
-import { number } from 'joi';
 import prisma from '../database';
 import { MusicSnippetInsertData } from '../types/musicSnippetType';
 
@@ -20,9 +19,26 @@ async function findMusicSnippets(
   });
 }
 
+async function findSnippet(musicId: number, musicSnippet: string): Promise<MusicSnippet | null> {
+  return prisma.musicSnippet.findUnique({
+    where: { musicSnippet_musicId: { musicId, musicSnippet } },
+  });
+}
+
+async function update(id: number, snippetAid: string) {
+  await prisma.musicSnippet.update({ where: { id }, data: { snippetAid } });
+}
+
+async function findById(id: number): Promise<MusicSnippet | null> {
+  return prisma.musicSnippet.findUnique({ where: { id } });
+}
+
 const musicSnippetRepository = {
   insert,
   findMusicSnippets,
+  findSnippet,
+  update,
+  findById,
 };
 
 export default musicSnippetRepository;
