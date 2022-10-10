@@ -12,9 +12,14 @@ async function findByMusicAndUser(
   return prisma.musicContributor.findUnique({ where: { musicId_userId: { musicId, userId } } });
 }
 
-const musicContributorsRepository = {
+async function contributorsByMusic(musicName: string) {
+  return prisma.musicContributor.count({ where: { musics: { name: musicName } } });
+}
+
+const musicContributorRepository = {
   insert,
   findByMusicAndUser,
+  contributorsByMusic,
 };
 
-export default musicContributorsRepository;
+export default musicContributorRepository;

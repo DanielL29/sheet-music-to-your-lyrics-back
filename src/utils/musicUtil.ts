@@ -10,6 +10,7 @@ interface MusicLiterals {
   embedYoutubeUrls: (isMusic: Music) => {
     musicVideoUrl: string | null, musicHelpVideoUrl: string | null
   }
+  formatReverseBarAndDot: (text: string) => string
 }
 
 const CHORDS_REGEX = /(\(*[CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug|m|M|°|[0-9])*[(]?[\d/]*[)]?(?:[CDEFGAB](?:b|bb)*(?:#|##|sus|maj|min|aug|m|M|°|[0-9])*[\d/]*)*\)*)(?=[\s|$])(?! [a-z])/;
@@ -93,6 +94,19 @@ const musicUtil: MusicLiterals = {
     }
 
     return { musicVideoUrl: embedVideoUrl, musicHelpVideoUrl: embedHelpVideoUrl };
+  },
+  formatReverseBarAndDot: (text) => {
+    let formattedText = '';
+
+    for (let i = 0; i < text.length; i++) {
+      if (text[i] === '/' || text[i] === '.') {
+        formattedText += '';
+      } else {
+        formattedText += text[i];
+      }
+    }
+
+    return formattedText;
   },
 };
 

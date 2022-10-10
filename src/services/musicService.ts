@@ -32,14 +32,16 @@ async function verifyMusicAndCategory(name: string, categoryId: number): Promise
 }
 
 async function insertOrFindAuthor(music: MusicSchema, musicFromVagalume: any): Promise<number> {
-  const isAuthor: Author | null = await authorRepository.findByName(musicFromVagalume.art.name);
+  const isAuthor: Author | null = await authorRepository.findByName(
+    musicUtil.formatReverseBarAndDot(musicFromVagalume.art.name),
+  );
   let authorId;
 
   if (isAuthor) {
     authorId = isAuthor.id;
   } else {
     const insertedAuthor: Author = await authorRepository.insert({
-      name: musicFromVagalume.art.name,
+      name: musicUtil.formatReverseBarAndDot(musicFromVagalume.art.name),
       imageUrl: musicFromVagalume.art.pic_medium,
       categoryId: Number(music.categoryId),
     });
@@ -79,7 +81,7 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
   return {
     lyric: musicFromVagalume.mus[0].text,
     translatedLyric,
-    name: musicFromVagalume.mus[0].name,
+    name: musicUtil.formatReverseBarAndDot(musicFromVagalume.mus[0].name),
     authorId,
   };
 }
