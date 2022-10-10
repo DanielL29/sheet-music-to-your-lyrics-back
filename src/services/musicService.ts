@@ -88,7 +88,7 @@ async function getMusicFromVagalume(music: MusicSchema): Promise<MusicVagalumeDa
 async function insert(
   music: MusicSchema,
   sheetMusicFile: Express.Multer.File | undefined,
-): Promise<void> {
+): Promise<Music | null> {
   let filename = music.sheetMusicFile;
   const {
     lyric, translatedLyric, name, authorId,
@@ -118,6 +118,8 @@ async function insert(
     lyric,
     translatedLyric,
   });
+
+  return musicRepository.findByName(name);
 }
 
 async function update(

@@ -1,7 +1,7 @@
 import Joi, { ObjectSchema } from 'joi';
 import { MusicSchema, MusicUpdateData } from '../types/musicType';
 
-const youtubeVideoRegex = /^(?:https?:)?(?:\/\/)?(?:youtu\.be\/|(?:www\.|m\.)?youtube\.com\/(?:watch|v|embed)(?:\.php)?(?:\?.*v=|\/))([a-zA-Z0-9-]{7,15})(?:[&][a-zA-Z0-9-]+=[a-zA-Z0-9-]+)*(?:[&].*)?$/;
+const youtubeVideoRegex = /^((?:https?:)?\/\/)?((?:www|m)\.)?((?:youtube(-nocookie)?\.com|youtu.be))(\/(?:[\w]+\?v=|embed\/|v\/)?)([\w]+)(\S+)?$/;
 const pdfAndImagesRegex = /^.+\.(([pP][dD][fF])|([jJ][pP][gG])|([pP][nN][gG]))$/;
 
 const insert: ObjectSchema<MusicSchema> = Joi.object({

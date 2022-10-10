@@ -5,7 +5,10 @@ import { MusicByCategory, MusicInsertData, MusicUpdateData } from '../types/musi
 async function findByName(name: string): Promise<Music | null> {
   return prisma.music.findUnique({
     where: { name },
-    include: { authors: { select: { name: true, imageUrl: true } } },
+    include: {
+      authors: { select: { name: true, imageUrl: true } },
+      categories: { select: { name: true } },
+    },
   });
 }
 
