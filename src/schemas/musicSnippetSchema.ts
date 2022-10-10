@@ -6,8 +6,13 @@ const insert: ObjectSchema<MusicSnippetInsertData> = Joi.object({
   snippetAid: Joi.string().required(),
 });
 
+const update: ObjectSchema<{ snippetAid: string }> = Joi.object({
+  snippetAid: Joi.string().required(),
+});
+
 const musicSnippetSchemas = {
   insert,
+  update,
 };
 
 export default musicSnippetSchemas;

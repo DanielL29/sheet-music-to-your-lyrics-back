@@ -13,6 +13,7 @@ const schemas: Schemas = {
   music: musicSchemas.insert,
   musicUpdate: musicSchemas.update,
   musicSnippet: musicSnippetSchemas.insert,
+  musicSnippetUpdate: musicSnippetSchemas.update,
 };
 
 export default schemas;
