@@ -22,9 +22,21 @@ async function getMusicSnippets(req: Request, res: Response) {
   res.status(200).send(musicSnippets);
 }
 
+async function update(req: Request, res: Response) {
+  const musicSnippetId = Number(req.params.musicSnippetId);
+  const userId: number = res.locals.user.id;
+  const { snippetAid } = req.body;
+  const snippetAidFile: Express.Multer.File | undefined = req.file;
+
+  await musicSnippetService.update(userId, musicSnippetId, snippetAid, snippetAidFile);
+
+  res.sendStatus(200);
+}
+
 const musicSnippetController = {
   insert,
   getMusicSnippets,
+  update,
 };
 
 export default musicSnippetController;
