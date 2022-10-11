@@ -58,10 +58,10 @@ async function insert(user: UserInsertData) {
   const encryptedPassword = hash.encrypt(user.password);
   delete user.confirmPassword;
 
-  await userRepository.insert({ ...user, password: encryptedPassword, teacher: false });
+  await userRepository.insert({ ...user, password: encryptedPassword });
 
   if (user.teacher) {
-    await sendEmailToContributor(user.email);
+    await makeUserContributor(user.email);
   }
 }
 
