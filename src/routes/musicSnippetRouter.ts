@@ -30,4 +30,6 @@ musicSnippetRouter.patch(
   musicSnippetController.update,
 );
 
+musicSnippetRouter.delete('/:musicSnippetId/remove', validateToken, validateTeacher, musicSnippetController.remove);
+
 export default musicSnippetRouter;
