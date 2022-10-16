@@ -1,4 +1,6 @@
-import { Author, Category, Music } from '@prisma/client';
+import {
+  Author, Category, Music, MusicSnippet,
+} from '@prisma/client';
 import dotenv from 'dotenv';
 import axios from 'axios';
 import errors from '../errors/errorsThrow';
@@ -10,6 +12,7 @@ import categoryRepository from '../repositories/categoryRepository';
 import musicUtil from '../utils/musicUtil';
 import s3Util from '../utils/s3Util';
 import authorRepository from '../repositories/authorRepository';
+import musicSnippetRepository from '../repositories/musicSnippetRepository';
 
 dotenv.config();
 
@@ -132,6 +135,14 @@ async function update(
 
   if (!isMusic) {
     throw errors.notFound('music', 'musics');
+  }
+
+  const isMusicSnippet: MusicSnippet[] = await musicSnippetRepository.findMusicSnippets(
+    isMusic.id,
+  );
+
+  if (music.lyric !== '' && isMusicSnippet.length > 0) {
+    throw errors.badRequest('This music has snippets, remove all snippets before update the lyric.');
   }
 
   if (NODE_ENV !== 'test') {
