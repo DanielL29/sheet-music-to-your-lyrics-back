@@ -3,6 +3,7 @@ import S3Storage from '../classes/S3Storage';
 interface S3Literals {
   insertFileInAWS: (file: Express.Multer.File | undefined) => Promise<string | null>
   updateFileInAWS: (dbFile: string, file: Express.Multer.File | undefined) => Promise<void>
+  deleteFileInAWS: (dbFile: string) => Promise<void>
 }
 
 const s3Storage = new S3Storage();
@@ -25,6 +26,9 @@ const s3Util: S3Literals = {
     } else if (file) {
       await s3Storage.saveFile(file.filename);
     }
+  },
+  deleteFileInAWS: async (dbFile) => {
+    await s3Storage.deleteFile(dbFile);
   },
 };
 
