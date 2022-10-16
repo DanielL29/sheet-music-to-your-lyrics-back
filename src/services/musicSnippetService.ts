@@ -66,8 +66,8 @@ async function insert(
   if (snippetAidFile) {
     const fileSize = Number(((snippetAidFile.size / 1024) / 1024).toFixed(4));
 
-    if (fileSize > 2) {
-      throw errors.badRequest('File limit size is 2MB');
+    if (fileSize > 20) {
+      throw errors.badRequest('File limit size is 20MB');
     }
 
     await s3Util.insertFileInAWS(snippetAidFile);
@@ -80,10 +80,10 @@ async function insert(
   await musicSnippetRepository.insert(
     userId,
     isMusic.id,
-    snippetAidFile ? {
+    snippetAidFile ? ({
       musicSnippet: formattedMusicSnippet,
       snippetAid: snippetAidFile.filename,
-    } : { ...musicSnippet, musicSnippet: formattedMusicSnippet },
+    }) : ({ ...musicSnippet, musicSnippet: formattedMusicSnippet }),
   );
   await musicRepository.update(musicName, { lyric: lyricUpdateWithSnippet });
   await insertContributor(isMusic.id, userId);
@@ -133,10 +133,30 @@ async function update(
   await insertContributor(isMusicSnippet.musicId, userId);
 }
 
+async function remove(musicSnippetId: number): Promise<void> {
+  const isMusicSnippet: MusicSnippet | null = await musicSnippetRepository.findById(musicSnippetId);
+
+  if (!isMusicSnippet) {
+    throw errors.notFound('musicSnippet', 'musicSnippets');
+  }
+
+  if (isMusicSnippet.snippetAid.endsWith('.mp4')) {
+    await s3Util.deleteFileInAWS(isMusicSnippet.snippetAid);
+  }
+
+  const music: Music | null = await musicRepository.findById(isMusicSnippet.musicId);
+
+  const lyricUpdated = music!.lyric.replace(`\f${isMusicSnippet.musicSnippet}\f`, isMusicSnippet.musicSnippet);
+
+  await musicRepository.update(music!.name, { lyric: lyricUpdated });
+  await musicSnippetRepository.remove(musicSnippetId);
+}
+
 const musicSnippetService = {
   insert,
   findMusicSnippets,
   update,
+  remove,
 };
 
 export default musicSnippetService;
