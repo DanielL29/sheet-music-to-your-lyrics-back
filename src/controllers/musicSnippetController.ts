@@ -33,10 +33,19 @@ async function update(req: Request, res: Response) {
   res.sendStatus(200);
 }
 
+async function remove(req: Request, res: Response) {
+  const musicSnippetId = Number(req.params.musicSnippetId);
+
+  await musicSnippetService.remove(musicSnippetId);
+
+  res.sendStatus(200);
+}
+
 const musicSnippetController = {
   insert,
   getMusicSnippets,
   update,
+  remove,
 };
 
 export default musicSnippetController;
