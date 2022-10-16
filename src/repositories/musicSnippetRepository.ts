@@ -33,12 +33,17 @@ async function findById(id: number): Promise<MusicSnippet | null> {
   return prisma.musicSnippet.findUnique({ where: { id } });
 }
 
+async function remove(id: number): Promise<void> {
+  await prisma.musicSnippet.delete({ where: { id } });
+}
+
 const musicSnippetRepository = {
   insert,
   findMusicSnippets,
   findSnippet,
   update,
   findById,
+  remove,
 };
 
 export default musicSnippetRepository;
